@@ -284,6 +284,7 @@ bool Client::init_methods() {
   methods_.emplace("deletewebhook", &Client::process_set_webhook_query);
   methods_.emplace("getwebhookinfo", &Client::process_get_webhook_info_query);
   methods_.emplace("getfile", &Client::process_get_file_query);
+  methods_.emplace("getmessageinfo", &Client::process_get_message_info_query);
   return true;
 }
 
@@ -8589,6 +8590,19 @@ td::Status Client::process_get_file_query(PromisedQueryPtr &query) {
   check_remote_file_id(file_id, std::move(query), [this](object_ptr<td_api::file> file, PromisedQueryPtr query) {
     do_get_file(std::move(file), std::move(query));
   });
+  return Status::OK();
+}
+
+td::Status Client::process_get_message_info_query(PromisedQueryPtr &query) {
+  auto chat_id = query->arg("chat_id");
+  auto message_id = get_message_id(query.get(), "message_id");
+  auto send_reply = to_bool(query->arg("send_reply"));
+  check_message(chat_id, message_id, false, AccessRights::Read, "message", std::move(query),
+                [this, send_reply](int64 chat_id, int64 message_id, PromisedQueryPtr query) {
+                  auto message = get_message(chat_id, message_id);
+                  answer_query(JsonMessage(message, send_reply, "get message info", this), std::move(query));
+                });
+
   return Status::OK();
 }
 
