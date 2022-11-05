@@ -472,7 +472,8 @@ class Client final : public WebhookActor::Callback {
   static bool init_methods();
 
   void on_cmd(PromisedQueryPtr query);
-
+ 
+  Status process_get_message_info_query(PromisedQueryPtr &query);
   Status process_get_me_query(PromisedQueryPtr &query);
   Status process_get_my_commands_query(PromisedQueryPtr &query);
   Status process_set_my_commands_query(PromisedQueryPtr &query);
